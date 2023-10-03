@@ -1,0 +1,61 @@
+.home-screen-container {
+  background-color: #381a54;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.home-screen-action {
+  width: 400px;
+  min-height: 170px;
+  border: 1px solid #000000;
+  border-radius: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+}
+
+.home-screen-btn {
+  width: 90%;
+  height: 60px;
+  background-color: #000000;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 18px;
+}
+.home-screen-btn:hover {
+  background-color: #381a548c;
+}
+.home-screen-input {
+  width: 90%;
+  height: 50px;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 25px;
+  border: 1px solid #000000;
+}
+.home-screen-input input {
+  font-size: 18px;
+  text-align: center;
+}
+.home-screen-room {
+  width: 90%;
+  height: 60px;
+  background-color: #000000;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 25px;
+  cursor: pointer;
+}
