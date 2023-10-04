@@ -1,21 +1,24 @@
 import { useContext, useEffect, useState } from "react";
-import { Empty, Input, Space } from "antd";
+import { App, Empty, Input, Modal, Space, message } from "antd";
 import { wsContext } from "../../context";
 import "./style.css";
 import PlayScreen from "../PlayScreen";
-import { Link } from "react-router-dom";
 // import {useHis} from 'react-router-dom'
 
 const HomeScreen = () => {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState("1");
   const [name, setName] = useState("");
   const [roomName, setRoomName] = useState("");
   const [listRoom, setListRoom] = useState([]);
   const wsContextValue = useContext(wsContext);
-  // const history = useHistory();
+  // const clickPlay = () => {
+  //   const soundBackground = new Audio("/sound/sound_background.wav");
+  //   soundBackground.loop = true;
+  //   soundBackground.play();
+  // };
   const onEnter = () => {
     if (name) {
-      setStep(2);
+      setStep("2");
       wsContextValue.emit("client-set-name", { name: name });
     }
   };
@@ -31,22 +34,46 @@ const HomeScreen = () => {
   };
   const onClickRoom = (name) => {
     if (name) {
-      setStep("final");
+      setRoomName(name);
       wsContextValue.emit("client-join-room", { name: name });
+      wsContextValue.on("notification", (data) => {
+        message.warning({
+          content: "Trò chơi đã được bắt đầu. Vui lòng tham gia phòng khác!!!",
+          key: "can-not-join-noti",
+        });
+        return setStep("join");
+      });
+      wsContextValue.on("client-join-room", (data) => {
+        document.getElementById("background_sound").play();
+        return setStep("final-player");
+      });
     }
   };
   const onEnterRoom = () => {
     if (roomName) {
-      setStep("final");
       wsContextValue.emit("client-create-room", { name: roomName });
+      wsContextValue.on("notification-error", (data) => {
+        message.warning({
+          content: "Tên phòng đã được tạo. Vui lòng tạo tên khác!!",
+          key: "can-not-join-noti",
+        });
+        return setStep("create");
+      });
+      wsContextValue.on("client-join-room", (data) => {
+        document.getElementById("background_sound").play();
+        return setStep("final-host");
+      });
     }
   };
   return (
     <>
-      {step === "final" ? (
-        <div className="home-screen-container">
+      <audio id="background_sound" style={{ display: 'none' }} autoplay controls>
+        <source src="/sound_background.wav" />
+      </audio>
+      {!step?.includes("final") ? (
+        <div id="home-container" className="home-screen-container">
           <div className="home-screen-action">
-            {step === 1 && (
+            {step === "1" && (
               <>
                 <div className="home-screen-input">
                   <Input
@@ -60,7 +87,7 @@ const HomeScreen = () => {
                 </div>
               </>
             )}
-            {step === 2 && (
+            {step === "2" && (
               <>
                 <div className="home-screen-btn" onClick={onCreateRoom}>
                   TẠO PHÒNG
@@ -69,6 +96,9 @@ const HomeScreen = () => {
                   THAM GIA
                 </div>
               </>
+            )}
+            {step === "join" && listRoom.length === 0 && (
+              <Empty description="Chưa có phòng nào" />
             )}
             {step === "join" && listRoom.length > 0 && (
               <>
@@ -89,9 +119,6 @@ const HomeScreen = () => {
                 ))}
               </>
             )}
-            {step === "join" && listRoom.length === 0 && (
-              <Empty description="Chưa có phòng nào" />
-            )}
             {step === "create" && (
               <>
                 <div className="home-screen-input">
@@ -110,7 +137,11 @@ const HomeScreen = () => {
           </div>
         </div>
       ) : (
-        <PlayScreen />
+        <PlayScreen
+          role={step?.includes("host") ? "host" : "player"}
+          name={name}
+          roomName={roomName}
+        />
       )}
     </>
   );
