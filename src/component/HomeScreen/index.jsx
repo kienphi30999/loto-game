@@ -12,7 +12,10 @@ const HomeScreen = () => {
   const [roomName, setRoomName] = useState("");
   const [listRoom, setListRoom] = useState([]);
   const wsContextValue = useContext(wsContext);
-  const [backgroundPlay] = useSound("/sound_background.wav", { volume: 0.5 });
+  const [backgroundPlay] = useSound("/sound_background.wav", {
+    volume: 0.5,
+    loop: true,
+  });
 
   const onEnter = () => {
     if (name) {
@@ -133,24 +136,29 @@ const HomeScreen = () => {
               </>
             )}
             {step === "join" && listRoom.length > 0 && (
-              <>
-                {listRoom.map((item, id) => (
-                  <Button
-                    clickSound="/button_click.mp3"
-                    className="home-screen-room"
-                    onClick={() => onClickRoom(item?.["room name"])}
-                  >
-                    <Space size={0} direction="vertical">
-                      <strong style={{ fontSize: 16 }}>
-                        {item?.["room name"]}
-                      </strong>
-                      <div style={{ fontSize: 12, color: "#f0f0f0" }}>
-                        Có {item?.total} người tham gia
-                      </div>
-                    </Space>
-                  </Button>
-                ))}
-              </>
+              <div className="home-screen-list-room">
+                {listRoom
+                  .concat(listRoom)
+                  .concat(listRoom)
+                  .concat(listRoom)
+                  .concat(listRoom)
+                  .map((item, id) => (
+                    <Button
+                      clickSound="/button_click.mp3"
+                      className="home-screen-room"
+                      onClick={() => onClickRoom(item?.["room name"])}
+                    >
+                      <Space size={0} direction="vertical">
+                        <strong style={{ fontSize: 16 }}>
+                          {item?.["room name"]}
+                        </strong>
+                        <div style={{ fontSize: 12, color: "#f0f0f0" }}>
+                          Có {item?.total} người tham gia
+                        </div>
+                      </Space>
+                    </Button>
+                  ))}
+              </div>
             )}
             {step === "create" && (
               <>
@@ -167,6 +175,16 @@ const HomeScreen = () => {
                   onClick={onEnterRoom}
                 >
                   <div>ENTER</div>
+                </Button>
+                <Button
+                  clickSound="/button_click.mp3"
+                  className="home-screen-btn"
+                  onClick={() => {
+                    setStep("2");
+                    setRoomName("");
+                  }}
+                >
+                  <div>QUAY LẠI</div>
                 </Button>
               </>
             )}

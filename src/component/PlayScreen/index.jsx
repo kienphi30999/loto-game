@@ -29,7 +29,7 @@ const isWin = (data, listSelect) => {
   });
 
   const winRow = Object.keys(countItemEachRow)?.find(
-    (item) => countItemEachRow?.[item] === 5
+    (item) => countItemEachRow?.[item] === 2
   );
 
   return winRow;
@@ -50,6 +50,7 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
   const [color, setColor] = useState(null);
   const [countdown, setCountdown] = useState(10);
   const [isClickStart, setIsClickStart] = useState(false);
+  const [isClickRandomAuto, setIsClickRandomAuto] = useState(false);
   const [isGameStart, setIsGameStart] = useState(false);
   const [randomNumber, setRandomNumber] = useState(0);
   const [isRunRandom, setIsRunRandom] = useState(false);
@@ -223,6 +224,9 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
       }, 0);
     }
   };
+  const onClickRandomANumberAuto = (e, room_id) => {
+    setIsClickRandomAuto(true);
+  };
   const onClickBingo = (boardData, selectedList, room_id) => {
     const winRow = isWin(boardData, selectedList);
     const idWinRow = +winRow?.[winRow?.length - 1] - 1;
@@ -232,6 +236,7 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
       room_id: room_id,
     });
   };
+  console.log(randomNumber);
   return (
     <div className="play-screen">
       {Array.from({ length: 200 }, (_, i) => i + 1).map((item, idx) => {
@@ -276,30 +281,44 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
           {isGameStart && role === "host" && (
             <>
               <Button
-                // clickSound="/button_click.mp3"
                 clickSound=""
                 hoverSound=""
                 className="play-screen--random-btn"
-                onClick={(e) => onClickRandomANumber(e, roomName)}
+                onClick={(e) => onClickRandomANumberAuto(e, roomName)}
                 style={{
                   opacity: !isRunRandom ? 1 : 0.5,
                   cursor: !isRunRandom ? "pointer" : "not-allowed",
                 }}
               >
-                Quay số
+                Quay số tự động
               </Button>
-              <Button
-                clickSound=""
-                hoverSound=""
-                className="play-screen--random-btn"
-                onClick={(e) => onClickStopRandomANumber(e, roomName)}
-                style={{
-                  opacity: isRunRandom ? 1 : 0.5,
-                  cursor: isRunRandom ? "pointer" : "not-allowed",
-                }}
-              >
-                Dừng
-              </Button>
+              {!isRunRandom ? (
+                <Button
+                  clickSound=""
+                  hoverSound=""
+                  className="play-screen--random-btn"
+                  onClick={(e) => onClickRandomANumber(e, roomName)}
+                  style={{
+                    opacity: !isRunRandom ? 1 : 0.5,
+                    cursor: !isRunRandom ? "pointer" : "not-allowed",
+                  }}
+                >
+                  Quay số
+                </Button>
+              ) : (
+                <Button
+                  clickSound=""
+                  hoverSound=""
+                  className="play-screen--random-btn"
+                  onClick={(e) => onClickStopRandomANumber(e, roomName)}
+                  style={{
+                    opacity: isRunRandom ? 1 : 0.5,
+                    cursor: isRunRandom ? "pointer" : "not-allowed",
+                  }}
+                >
+                  Dừng
+                </Button>
+              )}
             </>
           )}
           {!isClickStart && role === "host" && (
