@@ -29,7 +29,7 @@ const isWin = (data, listSelect) => {
   });
 
   const winRow = Object.keys(countItemEachRow)?.find(
-    (item) => countItemEachRow?.[item] === 2
+    (item) => countItemEachRow?.[item] === 5
   );
 
   return winRow;
