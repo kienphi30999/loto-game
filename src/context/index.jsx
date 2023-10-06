@@ -3,7 +3,7 @@ import { io } from "socket.io-client";
 
 export const wsContext = React.createContext(null);
 
-const socket = io("http://172.27.228.236:9999/", {
+const socket = io("https://loto-rnd.thanhlankool1.repl.co/", {
   path: "/ws/socket.io",
   transports: ["websocket"],
 });
