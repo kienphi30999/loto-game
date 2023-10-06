@@ -1,7 +1,12 @@
 import { Button, Result, Space } from "antd";
+import { useEffect } from "react";
+import useSound from "use-sound";
 
 const Congrat = ({ role, name, playerName, numberList, onReplay, onOut }) => {
-  console.log(role);
+  const [bingoPlay] = useSound("/bingo.mp3");
+  useEffect(() => {
+    bingoPlay();
+  }, [bingoPlay]);
   return (
     <Result
       status="success"

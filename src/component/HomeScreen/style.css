@@ -1,15 +1,18 @@
 .home-screen-container {
-  background-color: #381a54;
+  /* background-color: #381a54; */
   width: 100vw;
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  background: url("/public/background.jpg") no-repeat center center fixed;
+  background-size: cover;
 }
 .home-screen-action {
   width: 400px;
   min-height: 170px;
+  padding: 16px 0;
   border: 1px solid #000000;
   border-radius: 25px;
   display: flex;
@@ -17,23 +20,26 @@
   gap: 20px;
   align-items: center;
   justify-content: center;
-  background-color: #ffffff;
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.5);
 }
 
 .home-screen-btn {
   width: 90%;
   height: 60px;
-  background-color: #000000;
-  color: #ffffff;
+  border: 4px solid #023581;
+  color: #023581;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 25px;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 24px;
+  font-weight: bold;
 }
 .home-screen-btn:hover {
-  background-color: #381a548c;
+  box-shadow: 0 0 10px 0 #023581 inset, 0 0 20px 2px #023581;
+  border: 4px solid #023581;
 }
 .home-screen-input {
   width: 90%;
@@ -52,7 +58,7 @@
 .home-screen-room {
   width: 90%;
   height: 60px;
-  background-color: #000000;
+  background-color: #023581;
   color: #ffffff;
   display: flex;
   align-items: center;

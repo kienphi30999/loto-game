@@ -2,7 +2,7 @@
   display: grid;
   grid-template-columns: repeat(9, 1fr);
   grid-template-rows: repeat(9, 1fr);
-  border: 2px solid black;
+  /* border: 2px solid black; */
   grid-gap: 2px;
   width: 30%;
   height: calc(100% - 200px);
@@ -20,6 +20,9 @@
   font-weight: 600;
   cursor: pointer;
   position: relative;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
 }
 .loto-board-container--dot {
   position: absolute;

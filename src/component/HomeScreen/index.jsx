@@ -1,9 +1,10 @@
-import { useContext, useEffect, useState } from "react";
-import { App, Empty, Input, Modal, Space, message } from "antd";
+import { useContext, useState } from "react";
+import { Input, Space, message } from "antd";
 import { wsContext } from "../../context";
 import "./style.css";
 import PlayScreen from "../PlayScreen";
-// import {useHis} from 'react-router-dom'
+import Button from "../Button";
+import useSound from "use-sound";
 
 const HomeScreen = () => {
   const [step, setStep] = useState("1");
@@ -11,11 +12,8 @@ const HomeScreen = () => {
   const [roomName, setRoomName] = useState("");
   const [listRoom, setListRoom] = useState([]);
   const wsContextValue = useContext(wsContext);
-  // const clickPlay = () => {
-  //   const soundBackground = new Audio("/sound/sound_background.wav");
-  //   soundBackground.loop = true;
-  //   soundBackground.play();
-  // };
+  const [backgroundPlay] = useSound("/sound_background.wav", { volume: 0.5 });
+
   const onEnter = () => {
     if (name) {
       setStep("2");
@@ -44,7 +42,7 @@ const HomeScreen = () => {
         return setStep("join");
       });
       wsContextValue.on("client-join-room", (data) => {
-        document.getElementById("background_sound").play();
+        backgroundPlay();
         return setStep("final-player");
       });
     }
@@ -60,16 +58,13 @@ const HomeScreen = () => {
         return setStep("create");
       });
       wsContextValue.on("client-join-room", (data) => {
-        document.getElementById("background_sound").play();
+        backgroundPlay();
         return setStep("final-host");
       });
     }
   };
   return (
     <>
-      <audio id="background_sound" style={{ display: 'none' }} autoplay controls>
-        <source src="/sound_background.wav" />
-      </audio>
       {!step?.includes("final") ? (
         <div id="home-container" className="home-screen-container">
           <div className="home-screen-action">
@@ -82,28 +77,66 @@ const HomeScreen = () => {
                     bordered={false}
                   />
                 </div>
-                <div className="home-screen-btn" onClick={onEnter}>
-                  ENTER
-                </div>
+                <Button
+                  clickSound="/button_click.mp3"
+                  className="home-screen-btn"
+                  onClick={onEnter}
+                >
+                  <div>NEXT</div>
+                </Button>
               </>
             )}
             {step === "2" && (
               <>
-                <div className="home-screen-btn" onClick={onCreateRoom}>
-                  TẠO PHÒNG
-                </div>
-                <div className="home-screen-btn" onClick={onJoinRoom}>
-                  THAM GIA
-                </div>
+                <Button
+                  clickSound="/button_click.mp3"
+                  className="home-screen-btn"
+                  onClick={onCreateRoom}
+                >
+                  <div>TẠO PHÒNG</div>
+                </Button>
+                <Button
+                  clickSound="/button_click.mp3"
+                  className="home-screen-btn"
+                  onClick={onJoinRoom}
+                >
+                  <div>THAM GIA</div>
+                </Button>
+                <Button
+                  clickSound="/button_click.mp3"
+                  className="home-screen-btn"
+                  onClick={() => {
+                    setStep("1");
+                    setName("");
+                  }}
+                >
+                  <div>QUAY LẠI</div>
+                </Button>
               </>
             )}
             {step === "join" && listRoom.length === 0 && (
-              <Empty description="Chưa có phòng nào" />
+              <>
+                <div
+                  style={{ fontSize: 18, fontWeight: "bold", color: "#023581" }}
+                >
+                  KHÔNG CÓ PHÒNG !!!
+                </div>
+                <Button
+                  clickSound="/button_click.mp3"
+                  className="home-screen-btn"
+                  onClick={() => {
+                    setStep("2");
+                  }}
+                >
+                  <div>QUAY LẠI</div>
+                </Button>
+              </>
             )}
             {step === "join" && listRoom.length > 0 && (
               <>
                 {listRoom.map((item, id) => (
-                  <div
+                  <Button
+                    clickSound="/button_click.mp3"
                     className="home-screen-room"
                     onClick={() => onClickRoom(item?.["room name"])}
                   >
@@ -115,7 +148,7 @@ const HomeScreen = () => {
                         Có {item?.total} người tham gia
                       </div>
                     </Space>
-                  </div>
+                  </Button>
                 ))}
               </>
             )}
@@ -128,12 +161,15 @@ const HomeScreen = () => {
                     bordered={false}
                   />
                 </div>
-                <div className="home-screen-btn" onClick={onEnterRoom}>
-                  ENTER
-                </div>
+                <Button
+                  clickSound="/button_click.mp3"
+                  className="home-screen-btn"
+                  onClick={onEnterRoom}
+                >
+                  <div>ENTER</div>
+                </Button>
               </>
             )}
-            {/* {step === 4 && history.push()} */}
           </div>
         </div>
       ) : (
@@ -141,6 +177,11 @@ const HomeScreen = () => {
           role={step?.includes("host") ? "host" : "player"}
           name={name}
           roomName={roomName}
+          onReturnToWaitingRoom={() => {
+            setStep("2");
+            setListRoom([]);
+            setRoomName("");
+          }}
         />
       )}
     </>
