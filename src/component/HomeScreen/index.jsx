@@ -10,6 +10,7 @@ const HomeScreen = () => {
   const [step, setStep] = useState("1");
   const [name, setName] = useState("");
   const [roomName, setRoomName] = useState("");
+  const [roomNameAfterJoin, setRoomNameAfterJoin] = useState("");
   const [listRoom, setListRoom] = useState([]);
   const wsContextValue = useContext(wsContext);
   const [backgroundPlay] = useSound("/sound_background.wav", {
@@ -33,10 +34,18 @@ const HomeScreen = () => {
       setListRoom(data);
     });
   };
-  const onClickRoom = (name) => {
+  const onEnterAfterJoin = (name) => {
     if (name) {
-      setRoomName(name);
       wsContextValue.emit("client-join-room", { name: name });
+      if (
+        listRoom?.length > 0 &&
+        !listRoom?.map((x) => x?.["room name"])?.includes(name)
+      ) {
+        return message.error({
+          content: "Mã phòng không tồn tại trong hệ thống. Vui lòng nhập lại!!!",
+          key: "can-not-join-due-to-wrong-name",
+        });
+      }
       wsContextValue.on("notification", (data) => {
         message.warning({
           content: "Trò chơi đã được bắt đầu. Vui lòng tham gia phòng khác!!!",
@@ -129,6 +138,8 @@ const HomeScreen = () => {
                   className="home-screen-btn"
                   onClick={() => {
                     setStep("2");
+                    setRoomName("");
+                    setRoomNameAfterJoin("");
                   }}
                 >
                   <div>QUAY LẠI</div>
@@ -136,29 +147,33 @@ const HomeScreen = () => {
               </>
             )}
             {step === "join" && listRoom.length > 0 && (
-              <div className="home-screen-list-room">
-                {listRoom
-                  .concat(listRoom)
-                  .concat(listRoom)
-                  .concat(listRoom)
-                  .concat(listRoom)
-                  .map((item, id) => (
-                    <Button
-                      clickSound="/button_click.mp3"
-                      className="home-screen-room"
-                      onClick={() => onClickRoom(item?.["room name"])}
-                    >
-                      <Space size={0} direction="vertical">
-                        <strong style={{ fontSize: 16 }}>
-                          {item?.["room name"]}
-                        </strong>
-                        <div style={{ fontSize: 12, color: "#f0f0f0" }}>
-                          Có {item?.total} người tham gia
-                        </div>
-                      </Space>
-                    </Button>
-                  ))}
-              </div>
+              <>
+                <div className="home-screen-input">
+                  <Input
+                    onChange={(e) => setRoomNameAfterJoin(e.target.value)}
+                    placeholder="Nhập mã phòng"
+                    bordered={false}
+                  />
+                </div>
+                <Button
+                  clickSound="/button_click.mp3"
+                  className="home-screen-btn"
+                  onClick={() => onEnterAfterJoin(roomNameAfterJoin)}
+                >
+                  <div>ENTER</div>
+                </Button>
+                <Button
+                  clickSound="/button_click.mp3"
+                  className="home-screen-btn"
+                  onClick={() => {
+                    setStep("2");
+                    setRoomName("");
+                    setRoomNameAfterJoin("");
+                  }}
+                >
+                  <div>QUAY LẠI</div>
+                </Button>
+              </>
             )}
             {step === "create" && (
               <>
@@ -182,6 +197,7 @@ const HomeScreen = () => {
                   onClick={() => {
                     setStep("2");
                     setRoomName("");
+                    setRoomNameAfterJoin("");
                   }}
                 >
                   <div>QUAY LẠI</div>
@@ -199,6 +215,7 @@ const HomeScreen = () => {
             setStep("2");
             setListRoom([]);
             setRoomName("");
+            setRoomNameAfterJoin("");
           }}
         />
       )}

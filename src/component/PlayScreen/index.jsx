@@ -8,6 +8,7 @@ import { Modal } from "antd";
 import Congrat from "../Congrat";
 import Button from "../Button";
 import useSound from "use-sound";
+import PlayButton from "../PlayButton";
 
 const isWin = (data, listSelect) => {
   const listRow = [];
@@ -73,7 +74,11 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
 
   useEffect(() => {
     onClickRandom();
-  }, [wsContextValue]);
+    wsContextValue.emit("get-list-user", {
+      // lucky_number: randomNumber,
+      room_id: roomName,
+    });
+  }, [roomName, wsContextValue]);
   useEffect(() => {
     if (isClickStart) {
       let count = 10;
@@ -91,6 +96,46 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
     }
   }, [clockPlay, clockStop, isClickStart, startGamePlay]);
   useEffect(() => {
+    if (isClickRandomAuto) {
+      let count = 100;
+      spinPlay();
+      const countdownTime = setInterval(() => {
+        count -= 1;
+        const randomNum2 =
+          defaultListRandom[
+            Math.floor(Math.random() * defaultListRandom.length)
+          ];
+        setRandomNumber(randomNum2);
+        if (count === 0) {
+          spinStop();
+          setIsClickRandomAuto(false);
+          afterSpinPlay();
+          setTimeout(() => {
+            setDefaultListRandom((prev) =>
+              prev?.filter((item) => item !== randomNum2)
+            );
+            setListRandomNumber((prev) => [randomNum2, ...prev]);
+            wsContextValue.emit("send-lucky-number-to-user", {
+              lucky_number: randomNum2,
+              room_id: roomName,
+            });
+          }, 0);
+          console.log(randomNum2);
+          // startGamePlay();
+          // setIsGameStart(true);
+          return clearInterval(countdownTime);
+        }
+      }, 10);
+    }
+  }, [
+    defaultListRandom,
+    isClickRandomAuto,
+    roomName,
+    spinPlay,
+    spinStop,
+    wsContextValue,
+  ]);
+  useEffect(() => {
     if (isRunRandom) {
       spinPlay();
       randomFunc.current = setInterval(() => {
@@ -99,7 +144,7 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
             Math.floor(Math.random() * defaultListRandom.length)
           ];
         setRandomNumber(randomNum2);
-      }, 60);
+      }, 10);
     } else {
       spinStop();
       clearInterval(randomFunc.current);
@@ -199,7 +244,7 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
     });
   };
   const onClickRandomANumber = (e, room_id) => {
-    if (e.detail === 1 && !isRunRandom) {
+    if (e.detail === 1 && !isRunRandom && !isClickRandomAuto) {
       setIsRunRandom(true);
       setTimeout(() => {
         wsContextValue.emit("random-lucky-number-to-user", {
@@ -225,7 +270,14 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
     }
   };
   const onClickRandomANumberAuto = (e, room_id) => {
-    setIsClickRandomAuto(true);
+    if (!isRunRandom && !isClickRandomAuto) {
+      setIsClickRandomAuto(true);
+      setTimeout(() => {
+        wsContextValue.emit("random-lucky-number-to-user", {
+          room_id: room_id,
+        });
+      }, 0);
+    }
   };
   const onClickBingo = (boardData, selectedList, room_id) => {
     const winRow = isWin(boardData, selectedList);
@@ -249,7 +301,11 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
         </div>
         {listRandomNumber && listRandomNumber?.length > 0 && (
           <div className="play-screen-list-number">
-            <strong style={{ fontSize: 18 }}>Danh sách các số</strong>
+            <strong
+              style={{ fontSize: 18, color: "#ffffff", fontWeight: "bold" }}
+            >
+              Danh sách các số
+            </strong>
             <div className="play-screen-list-number-container">
               {listRandomNumber.map((item, id) => {
                 return (
@@ -266,50 +322,59 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
         )}
         <div className="play-screen-action-container">
           {!isGameStart && (
-            <Button
+            <PlayButton
               clickSound="/sound_choose.mp3"
               hoverSound=""
-              className="play-screen--random-btn"
+              // className="play-screen--random-btn"
               onClick={onClickRandom}
             >
               <div>Thần tài chọn số</div>
               {isClickStart && (
                 <div>(00:{countdown < 10 ? `0${countdown}` : 10})</div>
               )}
-            </Button>
+            </PlayButton>
           )}
           {isGameStart && role === "host" && (
             <>
-              <Button
+              {/* {!isClickRandomAuto && ( */}
+              <PlayButton
                 clickSound=""
                 hoverSound=""
-                className="play-screen--random-btn"
+                // className="play-screen--random-btn"
                 onClick={(e) => onClickRandomANumberAuto(e, roomName)}
                 style={{
-                  opacity: !isRunRandom ? 1 : 0.5,
-                  cursor: !isRunRandom ? "pointer" : "not-allowed",
+                  opacity: !isRunRandom && !isClickRandomAuto ? 1 : 0.5,
+                  cursor:
+                    !isRunRandom && !isClickRandomAuto
+                      ? "pointer"
+                      : "not-allowed",
                 }}
               >
                 Quay số tự động
-              </Button>
-              {!isRunRandom ? (
-                <Button
+              </PlayButton>
+              {/* )} */}
+              {!isRunRandom && (
+                <PlayButton
                   clickSound=""
                   hoverSound=""
-                  className="play-screen--random-btn"
+                  // className="play-screen--random-btn"
                   onClick={(e) => onClickRandomANumber(e, roomName)}
                   style={{
-                    opacity: !isRunRandom ? 1 : 0.5,
-                    cursor: !isRunRandom ? "pointer" : "not-allowed",
+                    opacity: !isRunRandom && !isClickRandomAuto ? 1 : 0.5,
+                    cursor:
+                      !isRunRandom && !isClickRandomAuto
+                        ? "pointer"
+                        : "not-allowed",
                   }}
                 >
-                  Quay số
-                </Button>
-              ) : (
-                <Button
+                  Quay số bằng cơm
+                </PlayButton>
+              )}
+              {isRunRandom && (
+                <PlayButton
                   clickSound=""
                   hoverSound=""
-                  className="play-screen--random-btn"
+                  // className="play-screen--random-btn"
                   onClick={(e) => onClickStopRandomANumber(e, roomName)}
                   style={{
                     opacity: isRunRandom ? 1 : 0.5,
@@ -317,29 +382,32 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
                   }}
                 >
                   Dừng
-                </Button>
+                </PlayButton>
               )}
             </>
           )}
           {!isClickStart && role === "host" && (
-            <Button
+            <PlayButton
               clickSound=""
               hoverSound=""
-              className="play-screen--random-btn"
+              // className="play-screen--random-btn"
               onClick={() => onClickStart(roomName)}
             >
               Bắt đầu chơi
-            </Button>
+            </PlayButton>
+            // <PlayButton
+            //   text="Bắt đầu chơi"
+            //   onClick={() => onClickStart(roomName)}
+            // />
           )}
           {isWin(matrix, listNumberOfPlayer) && (
-            <Button
+            <PlayButton
               clickSound=""
               hoverSound=""
               onClick={() => onClickBingo(matrix, listNumberOfPlayer, roomName)}
-              className="play-screen--random-btn"
             >
               Bingo
-            </Button>
+            </PlayButton>
           )}
         </div>
         <LotoBoard

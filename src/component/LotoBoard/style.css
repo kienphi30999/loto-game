@@ -26,8 +26,8 @@
 }
 .loto-board-container--dot {
   position: absolute;
-  top: 18%;
-  right: 6%;
+  top: calc(50% - 28px);
+  right: calc(50% - 26px);
   width: 55px;
   height: 55px;
   border-radius: 50%;

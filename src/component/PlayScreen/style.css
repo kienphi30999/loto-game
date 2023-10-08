@@ -22,7 +22,7 @@
   flex-direction: column;
   gap: 10px;
   position: absolute;
-  bottom: 40%;
+  bottom: 15%;
   right: 10%;
 }
 .play-screen-list-number {
@@ -32,8 +32,8 @@
   justify-content: center;
   gap: 10px;
   position: absolute;
-  top: 27%;
-  left: 2%;
+  top: 20%;
+  right: 3%;
   width: 29%;
   border: 2px solid #ffffff;
   border-radius: 16px;
@@ -71,6 +71,7 @@
   cursor: pointer;
   color: #ffffff;
   font-size: 18px;
+  border-radius: 25px;
   -webkit-user-select: none; /* Safari */
   -ms-user-select: none; /* IE 10 and IE 11 */
   user-select: none; /* Standard syntax */
