@@ -1,11 +1,11 @@
 .loto-board-container {
   display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  grid-template-rows: repeat(9, 1fr);
+  grid-template-columns: repeat(9, minmax(70px, 1fr));
+  grid-template-rows: repeat(9, minmax(70px, 1fr));
   /* border: 2px solid black; */
   grid-gap: 2px;
-  width: 30%;
-  height: calc(100% - 200px);
+  /* width: 30%; */
+  /* height: calc(100% - 200px); */
   background-color: black;
   /* border-radius: 16px; */
 }
@@ -26,8 +26,8 @@
 }
 .loto-board-container--dot {
   position: absolute;
-  top: 18%;
-  right: 6%;
+  top: calc(50% - 28px);
+  right: calc(50% - 26px);
   width: 55px;
   height: 55px;
   border-radius: 50%;

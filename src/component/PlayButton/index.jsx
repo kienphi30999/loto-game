@@ -1,8 +1,8 @@
 import useSound from "use-sound";
-// import hoverSound from "/button_hover.wav";
+import "./style.css";
 import { useState } from "react";
 
-const Button = ({
+const PlayButton = ({
   children,
   onClick,
   clickSound,
@@ -31,10 +31,11 @@ const Button = ({
       onMouseEnter={handleHover}
       onMouseLeave={handleMouseLeave}
       {...props}
+      className="btn-3d blue"
     >
       {children}
     </div>
   );
 };
 
-export default Button;
+export default PlayButton;

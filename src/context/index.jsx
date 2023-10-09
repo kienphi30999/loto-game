@@ -15,11 +15,11 @@ export function WebSocketConTextProvider({ children }) {
 
   React.useEffect(() => {
     socket.on("connect", (evt) => {
-      console.log("CONNECT BE WS", socket.id);
+      console.log("CONNECTED");
     });
 
     socket.on("disconnect", (evt) => {
-      console.log("DISCONNECT BE WS");
+      console.log("DISCONNECTED");
     });
 
     return () => {
@@ -28,7 +28,9 @@ export function WebSocketConTextProvider({ children }) {
     };
   }, []);
 
-  return <wsContext.Provider value={value.socketio}>{children}</wsContext.Provider>;
+  return (
+    <wsContext.Provider value={value.socketio}>{children}</wsContext.Provider>
+  );
 }
 // export default WebSocketConTextProvider;
 export default memo(WebSocketConTextProvider);
