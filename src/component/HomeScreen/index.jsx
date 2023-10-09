@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { memo, useContext, useState } from "react";
 import { Input, Space, message } from "antd";
 import { wsContext } from "../../context";
 import "./style.css";
@@ -6,6 +6,7 @@ import PlayScreen from "../PlayScreen";
 import Button from "../Button";
 import useSound from "use-sound";
 import { useEffect } from "react";
+import Congrat from "../Congrat";
 
 const HomeScreen = () => {
   const [step, setStep] = useState("1");
@@ -13,11 +14,13 @@ const HomeScreen = () => {
   const [roomName, setRoomName] = useState("");
   const [roomNameAfterJoin, setRoomNameAfterJoin] = useState("");
   const [listRoom, setListRoom] = useState([]);
+  const [bingoState, setBingoState] = useState({ name: null, list: [] });
   // const [sid, setSid] = useState(null);
   const wsContextValue = useContext(wsContext);
-  const [backgroundPlay] = useSound("/sound_background.wav", {
+  const [backgroundPlay] = useSound("/sound_background.mp3", {
     volume: 0.5,
     loop: true,
+    format: ["mp3"],
   });
 
   const onEnter = (e) => {
@@ -225,7 +228,6 @@ const HomeScreen = () => {
           role={step?.includes("host") ? "host" : "player"}
           name={name}
           roomName={roomName}
-          // sid={sid}
           onReturnToWaitingRoom={() => {
             setStep("2");
             setListRoom([]);
@@ -238,4 +240,4 @@ const HomeScreen = () => {
   );
 };
 
-export default HomeScreen;
+export default memo(HomeScreen);
