@@ -9,8 +9,8 @@ const LotoBoard = ({
   listNumberOfPlayer,
   listRandomNumber,
 }) => {
-  const [checkPlay] = useSound("/check.mp3");
-  const [checkErrorPlay] = useSound("/check_error.mp3");
+  const [checkPlay] = useSound("/check.mp3", { format: ["mp3"] });
+  const [checkErrorPlay] = useSound("/check_error.mp3", { format: ["mp3"] });
   const renderCell = (data) => {
     return data.map((x, ix) => {
       return x.map((y, iy) => {

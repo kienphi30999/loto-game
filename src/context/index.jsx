@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useMemo } from "react";
 import { io } from "socket.io-client";
 
 export const wsContext = React.createContext(null);
@@ -9,9 +9,11 @@ const socket = io("https://loto-rnd.thanhlankool1.repl.co/", {
 });
 
 export function WebSocketConTextProvider({ children }) {
-  const value = {
-    socketio: socket,
-  };
+  const value = useMemo(() => {
+    return {
+      socketio: socket,
+    };
+  }, []);
 
   React.useEffect(() => {
     socket.on("connect", (evt) => {

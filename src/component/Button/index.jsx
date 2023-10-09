@@ -9,8 +9,8 @@ const Button = ({
   hoverSound = "/button_hover.mp3",
   ...props
 }) => {
-  const [hoverPlay] = useSound(hoverSound, { volume: 0.5 });
-  const [clickPlay] = useSound(clickSound);
+  const [hoverPlay] = useSound(hoverSound, { volume: 0.5, format: ["mp3"] });
+  const [clickPlay] = useSound(clickSound, { format: ["mp3"] });
   const [isButtonHovered, setIsButtonHovered] = useState(false);
   const handleHover = () => {
     if (!isButtonHovered) {
