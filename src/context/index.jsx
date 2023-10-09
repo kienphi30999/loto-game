@@ -28,7 +28,9 @@ export function WebSocketConTextProvider({ children }) {
     };
   }, []);
 
-  return <wsContext.Provider value={value.socketio}>{children}</wsContext.Provider>;
+  return (
+    <wsContext.Provider value={value.socketio}>{children}</wsContext.Provider>
+  );
 }
 // export default WebSocketConTextProvider;
 export default memo(WebSocketConTextProvider);

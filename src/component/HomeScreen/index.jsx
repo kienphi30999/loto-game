@@ -5,6 +5,7 @@ import "./style.css";
 import PlayScreen from "../PlayScreen";
 import Button from "../Button";
 import useSound from "use-sound";
+import { useEffect } from "react";
 
 const HomeScreen = () => {
   const [step, setStep] = useState("1");
@@ -12,6 +13,7 @@ const HomeScreen = () => {
   const [roomName, setRoomName] = useState("");
   const [roomNameAfterJoin, setRoomNameAfterJoin] = useState("");
   const [listRoom, setListRoom] = useState([]);
+  // const [sid, setSid] = useState(null);
   const wsContextValue = useContext(wsContext);
   const [backgroundPlay] = useSound("/sound_background.wav", {
     volume: 0.5,
@@ -20,6 +22,9 @@ const HomeScreen = () => {
 
   const onEnter = () => {
     if (name) {
+      if (name?.length > 20) {
+        return message.warning("Tên player không được vượt quá 20 kí tự");
+      }
       setStep("2");
       wsContextValue.emit("client-set-name", { name: name });
     }
@@ -42,7 +47,8 @@ const HomeScreen = () => {
         !listRoom?.map((x) => x?.["room name"])?.includes(name)
       ) {
         return message.error({
-          content: "Mã phòng không tồn tại trong hệ thống. Vui lòng nhập lại!!!",
+          content:
+            "Mã phòng không tồn tại trong hệ thống. Vui lòng nhập lại!!!",
           key: "can-not-join-due-to-wrong-name",
         });
       }
@@ -55,12 +61,16 @@ const HomeScreen = () => {
       });
       wsContextValue.on("client-join-room", (data) => {
         backgroundPlay();
+        setRoomName(name);
         return setStep("final-player");
       });
     }
   };
   const onEnterRoom = () => {
     if (roomName) {
+      if (roomName?.length > 8) {
+        return message.warning("Tên phòng không được vượt quá 8 kí tự");
+      }
       wsContextValue.emit("client-create-room", { name: roomName });
       wsContextValue.on("notification-error", (data) => {
         message.warning({
@@ -211,6 +221,7 @@ const HomeScreen = () => {
           role={step?.includes("host") ? "host" : "player"}
           name={name}
           roomName={roomName}
+          // sid={sid}
           onReturnToWaitingRoom={() => {
             setStep("2");
             setListRoom([]);

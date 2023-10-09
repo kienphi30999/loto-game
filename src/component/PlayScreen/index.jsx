@@ -9,6 +9,16 @@ import Congrat from "../Congrat";
 import Button from "../Button";
 import useSound from "use-sound";
 import PlayButton from "../PlayButton";
+import {
+  Animal1,
+  Animal2,
+  Animal3,
+  Animal4,
+  Animal5,
+  Animal6,
+  HostIcon,
+} from "../../icon";
+import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
 
 const isWin = (data, listSelect) => {
   const listRow = [];
@@ -46,6 +56,15 @@ const colorBoard = [
   "#F7AF57",
 ];
 
+const avatarRandom = [
+  <Animal1 />,
+  <Animal2 />,
+  <Animal3 />,
+  <Animal4 />,
+  <Animal5 />,
+  <Animal6 />,
+];
+
 const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
   const [matrix, setMatrix] = useState(null);
   const [color, setColor] = useState(null);
@@ -60,6 +79,7 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
     Array.from({ length: 90 }, (_, i) => i + 1)
   );
   const [listNumberOfPlayer, setListNumberOfPlayer] = useState([]);
+  const [listUser, setListUser] = useState([]);
 
   const randomFunc = useRef();
 
@@ -75,10 +95,58 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
   useEffect(() => {
     onClickRandom();
     wsContextValue.emit("get-list-user", {
-      // lucky_number: randomNumber,
       room_id: roomName,
     });
+    wsContextValue.on("list-user-name", (data) => {
+      const objectHost = data?.find(
+        (item) => Object.keys(item || {})?.[0] === "is_host"
+      );
+      const hostId = objectHost?.["is_host"]?.sid;
+      const formatData = data?.slice(1)?.map((item) => {
+        const newId = Object.keys(item || {})?.[0];
+        const newName = Object.values(item || {})?.[0];
+        const randomAvt =
+          avatarRandom[Math.floor(Math.random() * avatarRandom.length)];
+        return {
+          id: newId,
+          name: newName,
+          isHost: hostId === newId,
+          avatar: randomAvt,
+        };
+      });
+      setListUser(formatData);
+    });
+    return () => {
+      wsContextValue.off("list-user-name");
+    };
   }, [roomName, wsContextValue]);
+  useEffect(() => {
+    wsContextValue.on("add-user", (data) => {
+      const newId = Object.keys(data || {})?.[0];
+      const newName = Object.values(data || {})?.[0];
+      const checkId = listUser?.map((x) => x?.id);
+      const checkName = listUser?.map((x) => x?.name);
+      const randomAvt =
+        avatarRandom[Math.floor(Math.random() * avatarRandom.length)];
+      if (!checkId?.includes(newId) && !checkName?.includes(newName)) {
+        setListUser((prev) => [
+          ...prev,
+          { id: newId, name: newName, avatar: randomAvt, isHost: false },
+        ]);
+      }
+    });
+    wsContextValue.on("remove-user", (data) => {
+      const newId = Object.keys(data || {})?.[0];
+      const checkId = listUser?.map((x) => x?.id);
+      if (checkId?.includes(newId)) {
+        setListUser((prev) => prev?.filter((x) => x?.id !== newId));
+      }
+    });
+    return () => {
+      wsContextValue.off("add-user");
+      wsContextValue.off("remove-user");
+    };
+  }, [listUser, roomName, wsContextValue]);
   useEffect(() => {
     if (isClickStart) {
       let count = 10;
@@ -120,7 +188,6 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
               room_id: roomName,
             });
           }, 0);
-          console.log(randomNum2);
           // startGamePlay();
           // setIsGameStart(true);
           return clearInterval(countdownTime);
@@ -128,6 +195,7 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
       }, 10);
     }
   }, [
+    afterSpinPlay,
     defaultListRandom,
     isClickRandomAuto,
     roomName,
@@ -288,18 +356,72 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
       room_id: room_id,
     });
   };
-  console.log(randomNumber);
+  console.log(listUser);
   return (
     <div className="play-screen">
       {Array.from({ length: 200 }, (_, i) => i + 1).map((item, idx) => {
         return <div key={idx} className="snow" />;
       })}
       <div className="play-screen-container">
-        <div className="play-screen-random-number">
-          <div style={{ fontSize: 18 }}>Số may mắn</div>
-          <div>{randomNumber < 10 ? `0${randomNumber}` : randomNumber}</div>
+        <div className="play-screen-header">
+          <div className="play-screen-random-number">
+            <div style={{ fontSize: 18 }}>Số người chơi</div>
+            <div>{listUser?.length}</div>
+          </div>
+          <div className="play-screen-random-number">
+            <div style={{ fontSize: 18 }}>Số may mắn</div>
+            <div>{randomNumber < 10 ? `0${randomNumber}` : randomNumber}</div>
+          </div>
+          <div className="play-screen-random-number">
+            <div style={{ fontSize: 18 }}>Mã phòng</div>
+            <div>{roomName}</div>
+          </div>
         </div>
-        {listRandomNumber && listRandomNumber?.length > 0 && (
+        <div className="play-screen-body">
+          <div className="play-screen-list-user">
+            <strong
+              style={{ fontSize: 18, color: "#ffffff", fontWeight: "bold" }}
+            >
+              Danh sách người chơi
+            </strong>
+            <div className="play-screen-list-user-container">
+              {listUser?.map((item) => {
+                return (
+                  <div className="play-screen-user-item">
+                    <div>{item?.avatar}</div>
+                    <div style={{ color: "#ffffff" }}>
+                      {item?.name} {wsContextValue?.id === item?.id && "(Bạn)"}
+                    </div>
+                    {item?.isHost && (
+                      <div>
+                        <HostIcon width={20} height={20} />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              {/* {listRandomNumber.map((item, id) => {
+                return (
+                  <div
+                    style={id === 0 ? { backgroundColor: color } : {}}
+                    className="play-screen-list-number-item"
+                  >
+                    {item}
+                  </div>
+                );
+              })} */}
+            </div>
+          </div>
+          <LotoBoard
+            matrix={matrix}
+            color={color}
+            listNumberOfPlayer={listNumberOfPlayer}
+            listRandomNumber={listRandomNumber}
+            onClickNumber={(val) =>
+              setListNumberOfPlayer((prev) => [val, ...prev])
+            }
+          />
+          {/* {listRandomNumber && listRandomNumber?.length > 0 ? ( */}
           <div className="play-screen-list-number">
             <strong
               style={{ fontSize: 18, color: "#ffffff", fontWeight: "bold" }}
@@ -319,7 +441,10 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
               })}
             </div>
           </div>
-        )}
+          {/* ) : (
+            <div style={{ width: "3%" }} />
+          )} */}
+        </div>
         <div className="play-screen-action-container">
           {!isGameStart && (
             <PlayButton
@@ -410,15 +535,6 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
             </PlayButton>
           )}
         </div>
-        <LotoBoard
-          matrix={matrix}
-          color={color}
-          listNumberOfPlayer={listNumberOfPlayer}
-          listRandomNumber={listRandomNumber}
-          onClickNumber={(val) =>
-            setListNumberOfPlayer((prev) => [val, ...prev])
-          }
-        />
       </div>
     </div>
   );
