@@ -30,7 +30,7 @@ const isWin = (data, listSelect) => {
   });
 
   const winRow = Object.keys(countItemEachRow)?.find(
-    (item) => countItemEachRow?.[item] === 1
+    (item) => countItemEachRow?.[item] === 5
   );
 
   return winRow;
@@ -367,11 +367,9 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
   const onClickRandomANumberAuto = (e, room_id) => {
     if (!isRunRandom && !isClickRandomAuto) {
       setIsClickRandomAuto(true);
-      // setTimeout(() => {
       wsContextValue.emit("random-lucky-number-to-user", {
         room_id: room_id,
       });
-      // }, 0);
     }
   };
   const onClickBingo = (boardData, selectedList, room_id) => {
