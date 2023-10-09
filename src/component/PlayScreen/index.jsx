@@ -1,24 +1,16 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { generate2DArray } from "../../utils";
+import { Popover, message, notification } from "antd";
 import LotoBoard from "../LotoBoard";
 import "./style.css";
 import "./snow.css";
 import { wsContext } from "../../context";
 import { Modal } from "antd";
 import Congrat from "../Congrat";
-import Button from "../Button";
+// import Button from "../Button";
 import useSound from "use-sound";
 import PlayButton from "../PlayButton";
-import {
-  Animal1,
-  Animal2,
-  Animal3,
-  Animal4,
-  Animal5,
-  Animal6,
-  HostIcon,
-} from "../../icon";
-import Masonry, { ResponsiveMasonry } from "react-responsive-masonry";
+import { HostIcon, OutIcon, TouchIcon } from "../../icon";
 
 const isWin = (data, listSelect) => {
   const listRow = [];
@@ -40,7 +32,7 @@ const isWin = (data, listSelect) => {
   });
 
   const winRow = Object.keys(countItemEachRow)?.find(
-    (item) => countItemEachRow?.[item] === 2
+    (item) => countItemEachRow?.[item] === 5
   );
 
   return winRow;
@@ -54,15 +46,6 @@ const colorBoard = [
   "#ADA9BB",
   "#00C5DB",
   "#F7AF57",
-];
-
-const avatarRandom = [
-  <Animal1 />,
-  <Animal2 />,
-  <Animal3 />,
-  <Animal4 />,
-  <Animal5 />,
-  <Animal6 />,
 ];
 
 const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
@@ -98,6 +81,12 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
       room_id: roomName,
     });
     wsContextValue.on("list-user-name", (data) => {
+      if (data?.length >= 2) {
+        message.info({
+          content: "Bạn vừa mới tham gia phòng",
+          key: "user-join-room",
+        });
+      }
       const objectHost = data?.find(
         (item) => Object.keys(item || {})?.[0] === "is_host"
       );
@@ -105,13 +94,12 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
       const formatData = data?.slice(1)?.map((item) => {
         const newId = Object.keys(item || {})?.[0];
         const newName = Object.values(item || {})?.[0];
-        const randomAvt =
-          avatarRandom[Math.floor(Math.random() * avatarRandom.length)];
+        const randomAvt = Math.floor(Math.random() * 6) + 1;
         return {
           id: newId,
           name: newName,
           isHost: hostId === newId,
-          avatar: randomAvt,
+          avtIndex: randomAvt,
         };
       });
       setListUser(formatData);
@@ -119,26 +107,38 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
     return () => {
       wsContextValue.off("list-user-name");
     };
-  }, [roomName, wsContextValue]);
+  }, [role, roomName, wsContextValue]);
   useEffect(() => {
     wsContextValue.on("add-user", (data) => {
       const newId = Object.keys(data || {})?.[0];
       const newName = Object.values(data || {})?.[0];
       const checkId = listUser?.map((x) => x?.id);
       const checkName = listUser?.map((x) => x?.name);
-      const randomAvt =
-        avatarRandom[Math.floor(Math.random() * avatarRandom.length)];
+      const randomAvt = Math.floor(Math.random() * 6) + 1;
       if (!checkId?.includes(newId) && !checkName?.includes(newName)) {
+        newId === wsContextValue.id
+          ? message.info("Bạn vừa mới tham gia phòng")
+          : message.info(
+              <span>
+                Người chơi <strong>{newName}</strong> vừa mới tham gia phòng
+              </span>
+            );
         setListUser((prev) => [
           ...prev,
-          { id: newId, name: newName, avatar: randomAvt, isHost: false },
+          { id: newId, name: newName, avtIndex: randomAvt, isHost: false },
         ]);
       }
     });
     wsContextValue.on("remove-user", (data) => {
       const newId = Object.keys(data || {})?.[0];
       const checkId = listUser?.map((x) => x?.id);
+      const newName = listUser?.find((x) => x?.id === newId)?.name;
       if (checkId?.includes(newId)) {
+        message.warning(
+          <span>
+            Người chơi <strong>{newName}</strong> đã rời khỏi phòng
+          </span>
+        );
         setListUser((prev) => prev?.filter((x) => x?.id !== newId));
       }
     });
@@ -178,18 +178,10 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
           spinStop();
           setIsClickRandomAuto(false);
           afterSpinPlay();
-          setTimeout(() => {
-            setDefaultListRandom((prev) =>
-              prev?.filter((item) => item !== randomNum2)
-            );
-            setListRandomNumber((prev) => [randomNum2, ...prev]);
-            wsContextValue.emit("send-lucky-number-to-user", {
-              lucky_number: randomNum2,
-              room_id: roomName,
-            });
-          }, 0);
-          // startGamePlay();
-          // setIsGameStart(true);
+          wsContextValue.emit("send-lucky-number-to-user", {
+            lucky_number: randomNum2,
+            room_id: roomName,
+          });
           return clearInterval(countdownTime);
         }
       }, 10);
@@ -227,25 +219,26 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
       wsContextValue.on("random-lucky-number", (data) => {
         setIsRunRandom(true);
       });
-      wsContextValue.on("lucky-range", (data) => {
-        if (data?.length === 0) {
-          onResetGame();
-          return Modal.destroyAll();
-        }
-        const listRandomNumber = data?.[0];
-        const latestRandomNumber =
-          listRandomNumber?.[listRandomNumber?.length - 1];
-        setIsRunRandom(false);
-        setTimeout(() => {
-          setRandomNumber(latestRandomNumber);
-        }, 70);
+    }
+    wsContextValue.on("lucky-range", (data) => {
+      if (data?.length === 0) {
+        onResetGame();
+        return Modal.destroyAll();
+      }
+      const listRandomNumber = data?.[0];
+      const latestRandomNumber =
+        listRandomNumber?.[listRandomNumber?.length - 1];
+      setIsRunRandom(false);
+      setTimeout(() => {
+        setRandomNumber(latestRandomNumber);
         setDefaultListRandom((prev) =>
           prev?.filter((item) => item !== latestRandomNumber)
         );
         setListRandomNumber((prev) => [latestRandomNumber, ...prev]);
-      });
-    }
+      }, 20);
+    });
     wsContextValue.on("out-room", (data) => {
+      message.warning(`${role === "host" ? "Bạn" : "Chủ phòng"} đã thoát`);
       onResetGame();
       Modal.destroyAll();
       onReturnToWaitingRoom();
@@ -285,8 +278,50 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
       wsContextValue.off("random-lucky-number");
       wsContextValue.off("lucky-range");
       wsContextValue.off("bingo");
+      wsContextValue.off("out-room");
     };
   }, [name, onReturnToWaitingRoom, role, roomName, wsContextValue]);
+  useEffect(() => {
+    wsContextValue.on("client-interact", (data) => {
+      const getUser = listUser?.find(
+        (item) => item?.id === data?.from_sid
+      )?.name;
+      if (data?.content === "shit" && role === "host") {
+        notification.warning({
+          message: <strong>Bạn vừa bị {getUser} ném đá</strong>,
+          description: "Vì một lí do nào đó, người chơi muốn ném đá bạn",
+          key: "shit",
+        });
+      }
+      if (
+        data?.content === "you-touch" &&
+        wsContextValue?.id !== data?.from_sid
+      ) {
+        notification.warning({
+          message: <strong>Bạn vừa bị {getUser} ghẹo</strong>,
+          description: "Chắc người ta thích bạn nên ghẹo vậy thui đó",
+          key: "you-touch",
+        });
+      }
+    });
+    wsContextValue.on("interact-all", (data) => {
+      const getUser = listUser?.find(
+        (item) => item?.id === data?.from_sid
+      )?.name;
+      if (data?.from_sid !== wsContextValue?.id) {
+        notification.warning({
+          message: <strong>{getUser} chỉ còn 1 số nữa thôi đó</strong>,
+          description:
+            "Người chơi này sẽ bingo ngay nếu trúng thêm 1 số nữa. Bạn hãy cẩn thận",
+          key: "only-1-to-bingo",
+        });
+      }
+    });
+
+    return () => {
+      wsContextValue.off("client-interact");
+    };
+  }, [listUser, role, wsContextValue]);
 
   const onClickRandom = () => {
     const data = generate2DArray();
@@ -304,47 +339,49 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
     setIsGameStart(false);
     setListNumberOfPlayer([]);
   };
-  const onClickStart = (room_id) => {
-    setIsClickStart(true);
-    wsContextValue.emit("start-game", {
-      countdown_time: 10,
-      room_id: room_id,
-    });
+  const onClickStart = (e, room_id) => {
+    if (e?.detail === 1 && room_id) {
+      setIsClickStart(true);
+      wsContextValue.emit("start-game", {
+        countdown_time: 10,
+        room_id: room_id,
+      });
+    }
   };
   const onClickRandomANumber = (e, room_id) => {
     if (e.detail === 1 && !isRunRandom && !isClickRandomAuto) {
       setIsRunRandom(true);
-      setTimeout(() => {
-        wsContextValue.emit("random-lucky-number-to-user", {
-          room_id: room_id,
-        });
-      }, 0);
+      // setTimeout(() => {
+      wsContextValue.emit("random-lucky-number-to-user", {
+        room_id: room_id,
+      });
+      // }, 0);
     }
   };
   const onClickStopRandomANumber = (e, room_id) => {
     if (e.detail === 1 && isRunRandom) {
       afterSpinPlay();
       setIsRunRandom(false);
-      setTimeout(() => {
-        setDefaultListRandom((prev) =>
-          prev?.filter((item) => item !== randomNumber)
-        );
-        setListRandomNumber((prev) => [randomNumber, ...prev]);
-        wsContextValue.emit("send-lucky-number-to-user", {
-          lucky_number: randomNumber,
-          room_id: room_id,
-        });
-      }, 0);
+      // setTimeout(() => {
+      // setDefaultListRandom((prev) =>
+      //   prev?.filter((item) => item !== randomNumber)
+      // );
+      // setListRandomNumber((prev) => [randomNumber, ...prev]);
+      wsContextValue.emit("send-lucky-number-to-user", {
+        lucky_number: randomNumber,
+        room_id: room_id,
+      });
+      // }, 0);
     }
   };
   const onClickRandomANumberAuto = (e, room_id) => {
     if (!isRunRandom && !isClickRandomAuto) {
       setIsClickRandomAuto(true);
-      setTimeout(() => {
-        wsContextValue.emit("random-lucky-number-to-user", {
-          room_id: room_id,
-        });
-      }, 0);
+      // setTimeout(() => {
+      wsContextValue.emit("random-lucky-number-to-user", {
+        room_id: room_id,
+      });
+      // }, 0);
     }
   };
   const onClickBingo = (boardData, selectedList, room_id) => {
@@ -356,13 +393,31 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
       room_id: room_id,
     });
   };
-  console.log(listUser);
+  const onClickOutRoom = (room_id) => {
+    if (room_id) {
+      if (role === "host") {
+        return wsContextValue.emit("owner-out-room", { room_id: roomName });
+      } else {
+        message.warning("Bạn đã rời khỏi phòng");
+        onReturnToWaitingRoom();
+        return wsContextValue.emit("client-out-room", {
+          room_id: room_id,
+        });
+      }
+    }
+  };
   return (
     <div className="play-screen">
       {Array.from({ length: 200 }, (_, i) => i + 1).map((item, idx) => {
         return <div key={idx} className="snow" />;
       })}
       <div className="play-screen-container">
+        <div
+          onClick={() => onClickOutRoom(roomName)}
+          className="play-screen-out-room"
+        >
+          <OutIcon />
+        </div>
         <div className="play-screen-header">
           <div className="play-screen-random-number">
             <div style={{ fontSize: 18 }}>Số người chơi</div>
@@ -388,7 +443,9 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
               {listUser?.map((item) => {
                 return (
                   <div className="play-screen-user-item">
-                    <div>{item?.avatar}</div>
+                    <div>
+                      <img src={`/animal${item?.avtIndex}.svg`} alt="" />
+                    </div>
                     <div style={{ color: "#ffffff" }}>
                       {item?.name} {wsContextValue?.id === item?.id && "(Bạn)"}
                     </div>
@@ -396,6 +453,29 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
                       <div>
                         <HostIcon width={20} height={20} />
                       </div>
+                    )}
+                    {wsContextValue?.id !== item?.id && (
+                      <Popover
+                        title={null}
+                        content="Ghẹo"
+                        align={{ offset: [0, 0] }}
+                      >
+                        <div
+                          onClick={() => {
+                            message.success({
+                              content: `Bạn vừa ghẹo ${item?.name}`,
+                              key: `you-touch-${item?.id}`,
+                            });
+                            wsContextValue.emit("client-interact", {
+                              content: "you-touch",
+                              receive_sid: item?.id,
+                            });
+                          }}
+                          style={{ cursor: "pointer" }}
+                        >
+                          <TouchIcon />
+                        </div>
+                      </Popover>
                     )}
                   </div>
                 );
@@ -447,17 +527,37 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
         </div>
         <div className="play-screen-action-container">
           {!isGameStart && (
-            <PlayButton
-              clickSound="/sound_choose.mp3"
-              hoverSound=""
-              // className="play-screen--random-btn"
-              onClick={onClickRandom}
-            >
-              <div>Thần tài chọn số</div>
-              {isClickStart && (
-                <div>(00:{countdown < 10 ? `0${countdown}` : 10})</div>
-              )}
-            </PlayButton>
+            <>
+              <PlayButton
+                clickSound="/sound_choose.mp3"
+                hoverSound=""
+                // className="play-screen--random-btn"
+                onClick={onClickRandom}
+              >
+                <div>Thần tài chọn số</div>
+              </PlayButton>
+              <PlayButton
+                clickSound=""
+                hoverSound=""
+                // className="play-screen--random-btn"
+                style={{
+                  cursor:
+                    !isClickStart && role === "host"
+                      ? "pointer"
+                      : "not-allowed",
+                  opacity: !isClickStart && role === "host" ? 1 : 0.5,
+                }}
+                onClick={(e) =>
+                  !isClickStart && role === "host" && onClickStart(e, roomName)
+                }
+              >
+                {isClickStart ? (
+                  <div>00:{countdown < 10 ? `0${countdown}` : 10}</div>
+                ) : (
+                  <div>Bắt đầu chơi</div>
+                )}
+              </PlayButton>
+            </>
           )}
           {isGameStart && role === "host" && (
             <>
@@ -511,19 +611,54 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
               )}
             </>
           )}
-          {!isClickStart && role === "host" && (
-            <PlayButton
-              clickSound=""
-              hoverSound=""
-              // className="play-screen--random-btn"
-              onClick={() => onClickStart(roomName)}
-            >
-              Bắt đầu chơi
-            </PlayButton>
-            // <PlayButton
-            //   text="Bắt đầu chơi"
-            //   onClick={() => onClickStart(roomName)}
-            // />
+          {isGameStart && role === "player" && (
+            <>
+              <PlayButton
+                clickSound=""
+                hoverSound=""
+                // className="play-screen--random-btn"
+                onClick={(e) => {
+                  message.success({
+                    content: "Bạn vừa ném đá chủ phòng",
+                    key: "you-shit",
+                  });
+                  wsContextValue.emit("client-interact", {
+                    // lucky_range: listWinRow,
+                    content: "shit",
+                    receive_sid: listUser?.find((x) => x?.isHost)?.id,
+                    // room_id: room_id,
+                  });
+                }}
+                // style={{
+                //   opacity: isRunRandom ? 1 : 0.5,
+                //   cursor: isRunRandom ? "pointer" : "not-allowed",
+                // }}
+              >
+                Ném đá chủ phòng
+              </PlayButton>
+              <PlayButton
+                clickSound=""
+                hoverSound=""
+                // className="play-screen--random-btn"
+                onClick={(e) => {
+                  message.success({
+                    content:
+                      "Bạn vừa thông báo đến mọi người rằng mình sắp bingo",
+                    key: "you-about-to-bingo",
+                  });
+                  wsContextValue.emit("interact-all", {
+                    content: "only-1-to-bingo",
+                    room_id: roomName,
+                  });
+                }}
+                // style={{
+                //   opacity: isRunRandom ? 1 : 0.5,
+                //   cursor: isRunRandom ? "pointer" : "not-allowed",
+                // }}
+              >
+                Tui còn 1 số nữa
+              </PlayButton>
+            </>
           )}
           {isWin(matrix, listNumberOfPlayer) && (
             <PlayButton

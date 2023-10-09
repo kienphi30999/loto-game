@@ -16,6 +16,12 @@
   overflow: hidden;
   filter: drop-shadow(0 0 10px white);
 }
+.play-screen-out-room {
+  position: absolute;
+  top: 4%;
+  right: 3%;
+  cursor: pointer;
+}
 .play-screen-header {
   display: flex;
   align-items: center;
@@ -30,10 +36,14 @@
   padding: 0 40px;
 }
 .play-screen-action-container {
-  display: grid;
+  /* display: grid;
   grid-template-columns: repeat(2, minmax(70px, 1fr));
-  grid-template-rows: repeat(1, minmax(70px, 1fr));
+  grid-template-rows: repeat(1, minmax(70px, 1fr)); */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 30px;
+  width: 100%;
 }
 .play-screen-list-user {
   width: 30%;

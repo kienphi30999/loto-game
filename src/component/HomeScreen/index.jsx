@@ -20,8 +20,8 @@ const HomeScreen = () => {
     loop: true,
   });
 
-  const onEnter = () => {
-    if (name) {
+  const onEnter = (e) => {
+    if (name && e?.detail === 1) {
       if (name?.length > 20) {
         return message.warning("Tên player không được vượt quá 20 kí tự");
       }
@@ -29,18 +29,22 @@ const HomeScreen = () => {
       wsContextValue.emit("client-set-name", { name: name });
     }
   };
-  const onCreateRoom = () => {
-    setStep("create");
+  const onCreateRoom = (e) => {
+    if (e?.detail === 1) {
+      setStep("create");
+    }
   };
-  const onJoinRoom = () => {
-    setStep("join");
-    wsContextValue.emit("get-list-room");
-    wsContextValue.on("list-room", (data) => {
-      setListRoom(data);
-    });
+  const onJoinRoom = (e) => {
+    if (e?.detail === 1) {
+      setStep("join");
+      wsContextValue.emit("get-list-room");
+      wsContextValue.on("list-room", (data) => {
+        setListRoom(data);
+      });
+    }
   };
-  const onEnterAfterJoin = (name) => {
-    if (name) {
+  const onEnterAfterJoin = (e, name) => {
+    if (name && e?.detail === 1) {
       wsContextValue.emit("client-join-room", { name: name });
       if (
         listRoom?.length > 0 &&
@@ -66,8 +70,8 @@ const HomeScreen = () => {
       });
     }
   };
-  const onEnterRoom = () => {
-    if (roomName) {
+  const onEnterRoom = (e) => {
+    if (roomName && e?.detail === 1) {
       if (roomName?.length > 8) {
         return message.warning("Tên phòng không được vượt quá 8 kí tự");
       }
@@ -168,7 +172,7 @@ const HomeScreen = () => {
                 <Button
                   clickSound="/button_click.mp3"
                   className="home-screen-btn"
-                  onClick={() => onEnterAfterJoin(roomNameAfterJoin)}
+                  onClick={(e) => onEnterAfterJoin(e, roomNameAfterJoin)}
                 >
                   <div>ENTER</div>
                 </Button>
