@@ -56,6 +56,12 @@
   box-shadow: 0 0 10px 0 #023581 inset, 0 0 20px 2px #023581;
   border: 4px solid #023581;
 }
+.home-screen-input-container {
+  display: flex;
+  align-items: center;
+  width: 90%;
+  gap: 10px;
+}
 .home-screen-input {
   width: 90%;
   height: 50px;
@@ -67,7 +73,7 @@
   border: 1px solid #000000;
 }
 .home-screen-input input {
-  font-size: 18px;
+  font-size: 20px;
   text-align: center;
 }
 .home-screen-room {
@@ -93,5 +99,44 @@
   align-items: center;
   /* justify-content: center; */
   overflow-y: auto;
-  height: 254px;
+  min-height: auto;
+  max-height: 254px;
+}
+.home-screen-list-room--item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 90%;
+  height: 70px;
+  color: #023581;
+  font-weight: bold;
+  font-size: 20px;
+  border: 2px solid #023581;
+  border-radius: 25px;
+  text-align: center;
+  cursor: pointer;
+}
+.home-screen-list-room--item:hover {
+  background-color: #023581;
+  color: #ffffff;
+}
+
+/* width */
+.home-screen-list-room::-webkit-scrollbar {
+  width: 2px;
+}
+
+/* Track */
+.home-screen-list-room::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Handle */
+.home-screen-list-room::-webkit-scrollbar-thumb {
+  background: #023581;
+}
+
+/* Handle on hover */
+.home-screen-list-room::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

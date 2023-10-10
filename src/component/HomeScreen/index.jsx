@@ -5,7 +5,7 @@ import "./style.css";
 import PlayScreen from "../PlayScreen";
 import Button from "../Button";
 import useSound from "use-sound";
-import { LeftIcon, RightIcon } from "../../icon";
+import { JoinIcon, LeftIcon, RightIcon } from "../../icon";
 
 const settingList = [
   "Tuyết rơi",
@@ -23,6 +23,7 @@ const HomeScreen = () => {
   const [listRoom, setListRoom] = useState([]);
   const [background, setBackground] = useState(0);
   const [timeAuto, setTimeAuto] = useState(2);
+  const [isPrivate, setIsPrivate] = useState(false);
   const wsContextValue = useContext(wsContext);
   const [backgroundPlay, { stop: backgroundStop }] = useSound(
     "/sound_background.mp3",
@@ -64,21 +65,19 @@ const HomeScreen = () => {
   const onEnterAfterJoin = (e, name) => {
     if (name && e?.detail === 1) {
       wsContextValue.emit("client-join-room", { name: name });
-      if (
-        listRoom?.length > 0 &&
-        !listRoom?.map((x) => x?.["room name"])?.includes(name)
-      ) {
-        return message.error({
-          content:
-            "Mã phòng không tồn tại trong hệ thống. Vui lòng nhập lại!!!",
-          key: "can-not-join-due-to-wrong-name",
-        });
-      }
       wsContextValue.on("notification", (data) => {
-        message.warning({
-          content: "Trò chơi đã được bắt đầu. Vui lòng tham gia phòng khác!!!",
-          key: "can-not-join-noti",
-        });
+        if (data === "Phòng Không Tồn Tại !!!!") {
+          message.warning({
+            content: "Phòng không tồn tại. Vui lòng tham gia phòng khác!!!",
+            key: "can-not-join-noti",
+          });
+        } else {
+          message.warning({
+            content:
+              "Trò chơi đã được bắt đầu. Vui lòng tham gia phòng khác!!!",
+            key: "can-not-join-noti",
+          });
+        }
         return setStep("join");
       });
       wsContextValue.on("client-join-room", (data) => {
@@ -93,7 +92,10 @@ const HomeScreen = () => {
       if (roomName?.length > 8) {
         return message.warning("Tên phòng không được vượt quá 8 kí tự");
       }
-      wsContextValue.emit("client-create-room", { name: roomName });
+      wsContextValue.emit("client-create-room", {
+        name: roomName,
+        is_private: isPrivate,
+      });
       wsContextValue.on("notification-error", (data) => {
         message.warning({
           content: "Tên phòng đã được tạo. Vui lòng tạo tên khác!!",
@@ -264,13 +266,31 @@ const HomeScreen = () => {
                 </Button>
               </>
             )}
-            {step === "join" && listRoom.length === 0 && (
+            {step === "join" && (
               <>
                 <div
-                  style={{ fontSize: 18, fontWeight: "bold", color: "#023581" }}
+                  style={{
+                    fontSize: 18,
+                    color: "#023581",
+                    fontWeight: "bold",
+                  }}
                 >
-                  KHÔNG CÓ PHÒNG !!!
+                  Nhập mã phòng để tham gia
                 </div>
+                <div className="home-screen-input">
+                  <Input
+                    onChange={(e) => setRoomNameAfterJoin(e.target.value)}
+                    placeholder="Mã phòng"
+                    bordered={false}
+                  />
+                </div>
+                <Button
+                  clickSound="/button_click.mp3"
+                  className="home-screen-btn"
+                  onClick={(e) => onEnterAfterJoin(e, roomNameAfterJoin)}
+                >
+                  <div>ENTER</div>
+                </Button>
                 <Button
                   clickSound="/button_click.mp3"
                   className="home-screen-btn"
@@ -282,9 +302,42 @@ const HomeScreen = () => {
                 >
                   <div>QUAY LẠI</div>
                 </Button>
+                {listRoom?.length > 0 && (
+                  <>
+                    <div
+                      style={{
+                        fontSize: 18,
+                        color: "#023581",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      hoặc tham gia các phòng dưới
+                    </div>
+                    <div className="home-screen-list-room">
+                      {listRoom?.map((item) => {
+                        return (
+                          <Button
+                            key={item?.["room name"]}
+                            className="home-screen-list-room--item"
+                            onClick={(e) =>
+                              onEnterAfterJoin(e, item?.["room name"])
+                            }
+                          >
+                            <div>
+                              <div>{item?.["room name"]}</div>
+                              <div style={{ fontSize: 14, fontWeight: 500 }}>
+                                Có {item?.total} người tham gia
+                              </div>
+                            </div>
+                          </Button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
               </>
             )}
-            {step === "join" && listRoom.length > 0 && (
+            {/* {step === "join" && listRoom.length > 0 && (
               <>
                 <div className="home-screen-input">
                   <Input
@@ -312,7 +365,7 @@ const HomeScreen = () => {
                   <div>QUAY LẠI</div>
                 </Button>
               </>
-            )}
+            )} */}
             {step === "create" && (
               <>
                 <div className="home-screen-input">
@@ -321,6 +374,41 @@ const HomeScreen = () => {
                     placeholder="Nhập tên phòng"
                     bordered={false}
                   />
+                </div>
+                <div
+                  style={{ justifyContent: "center", gap: 15 }}
+                  className="home-screen-setting"
+                >
+                  <div>Riêng tư:</div>
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 7 }}
+                  >
+                    <LeftIcon
+                      style={{
+                        cursor: isPrivate ? "pointer" : "not-allowed",
+                        opacity: isPrivate ? 1 : 0.5,
+                      }}
+                      onClick={() => {
+                        if (isPrivate) {
+                          setIsPrivate(false);
+                        }
+                      }}
+                      color="#023581"
+                    />
+                    <div>{isPrivate ? "Có" : "Không"}</div>
+                    <RightIcon
+                      style={{
+                        cursor: !isPrivate ? "pointer" : "not-allowed",
+                        opacity: !isPrivate ? 1 : 0.5,
+                      }}
+                      onClick={() => {
+                        if (!isPrivate) {
+                          setIsPrivate(true);
+                        }
+                      }}
+                      color="#023581"
+                    />
+                  </div>
                 </div>
                 <Button
                   clickSound="/button_click.mp3"
@@ -357,6 +445,7 @@ const HomeScreen = () => {
             setListRoom([]);
             setRoomName("");
             setRoomNameAfterJoin("");
+            setIsPrivate(false);
           }}
         />
       )}
