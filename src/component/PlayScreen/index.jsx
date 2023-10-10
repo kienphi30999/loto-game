@@ -82,6 +82,10 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
     format: ["mp3"],
   });
   const [startGamePlay] = useSound("/game_start.mp3", { format: ["mp3"] });
+  const [notificationPlay] = useSound("/sound_notification.mp3", {
+    format: ["mp3"],
+    volume: 0.6,
+  });
 
   useEffect(() => {
     onClickRandom();
@@ -271,6 +275,7 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
         (item) => item?.id === data?.from_sid
       )?.name;
       if (data?.content === "shit" && role === "host") {
+        notificationPlay();
         notification.warning({
           message: <strong>Bạn vừa bị {getUser} ném đá</strong>,
           description: "Vì một lí do nào đó, người chơi này muốn ném đá bạn",
@@ -281,6 +286,7 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
         data?.content === "you-touch" &&
         wsContextValue?.id !== data?.from_sid
       ) {
+        notificationPlay();
         notification.warning({
           message: <strong>Bạn vừa bị {getUser} ghẹo</strong>,
           description: "Chắc người ta thích bạn nên ghẹo vậy thui đó",
@@ -297,6 +303,7 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
       )?.isHost;
       if (data?.from_sid !== wsContextValue?.id) {
         if (isHost) {
+          notificationPlay();
           notification.warning({
             message: <strong>Chủ phòng chỉ còn 1 số nữa thôi</strong>,
             description:
@@ -304,6 +311,7 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
             key: "only-1-to-bingo",
           });
         } else {
+          notificationPlay();
           notification.warning({
             message: <strong>{getUser} chỉ còn 1 số nữa thôi</strong>,
             description:
@@ -317,7 +325,7 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
     return () => {
       wsContextValue.off("client-interact");
     };
-  }, [listUser, role, wsContextValue]);
+  }, [listUser, notificationPlay, role, wsContextValue]);
 
   const onClickRandom = () => {
     const data = generate2DArray();
@@ -622,14 +630,16 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
                       clickSound=""
                       hoverSound=""
                       onClick={(e) => {
-                        message.success({
-                          content: "Bạn vừa ném đá chủ phòng",
-                          key: "you-shit",
-                        });
-                        wsContextValue.emit("client-interact", {
-                          content: "shit",
-                          receive_sid: listUser?.find((x) => x?.isHost)?.id,
-                        });
+                        if (e.detail === 1) {
+                          message.success({
+                            content: "Bạn vừa ném đá chủ phòng",
+                            key: "you-shit",
+                          });
+                          wsContextValue.emit("client-interact", {
+                            content: "shit",
+                            receive_sid: listUser?.find((x) => x?.isHost)?.id,
+                          });
+                        }
                       }}
                     >
                       Ném đá chủ phòng
@@ -639,15 +649,17 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
                     clickSound=""
                     hoverSound=""
                     onClick={(e) => {
-                      message.success({
-                        content:
-                          "Bạn vừa thông báo đến mọi người rằng mình sắp bingo",
-                        key: "you-about-to-bingo",
-                      });
-                      wsContextValue.emit("interact-all", {
-                        content: "only-1-to-bingo",
-                        room_id: roomName,
-                      });
+                      if (e.detail === 1) {
+                        message.success({
+                          content:
+                            "Bạn vừa thông báo đến mọi người rằng mình sắp bingo",
+                          key: "you-about-to-bingo",
+                        });
+                        wsContextValue.emit("interact-all", {
+                          content: "only-1-to-bingo",
+                          room_id: roomName,
+                        });
+                      }
                     }}
                   >
                     Tui còn 1 số nữa
