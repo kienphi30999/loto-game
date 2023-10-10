@@ -12,7 +12,7 @@ const Congrat = ({ role, name, playerName, numberList, onReplay, onOut }) => {
 
   return (
     <div className="congrat">
-      {Array.from({ length: 151 }, (_, i) => i).map((item, idx) => {
+      {Array.from({ length: 551 }, (_, i) => i).map((item, idx) => {
         return <div key={idx} className={`confetti-${item}`} />;
       })}
       <div className="congrat-container">
