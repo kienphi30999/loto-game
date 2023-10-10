@@ -1,6 +1,6 @@
 import { memo, useContext, useEffect, useRef, useState } from "react";
 import { generate2DArray } from "../../utils";
-import { Popover, message, notification } from "antd";
+import { Popover, Space, message, notification } from "antd";
 import LotoBoard from "../LotoBoard";
 import "./style.css";
 import "./snow.css";
@@ -8,7 +8,19 @@ import { wsContext } from "../../context";
 import Congrat from "../Congrat";
 import useSound from "use-sound";
 import PlayButton from "../PlayButton";
-import { HostIcon, OutIcon, TouchIcon } from "../../icon";
+import {
+  AngryIcon,
+  ClockIcon,
+  HostIcon,
+  MagicHandIcon,
+  MagicIcon,
+  OutIcon,
+  PlayIcon,
+  StopIcon,
+  SurpriseIcon,
+  TouchIcon,
+  TrophyIcon,
+} from "../../icon";
 
 const isWin = (data, listSelect) => {
   const listRow = [];
@@ -534,7 +546,7 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
                         style={id === 0 ? { backgroundColor: color } : {}}
                         className="play-screen-list-number-item"
                       >
-                        {item}
+                        {+item < 10 ? `0${item}` : item}
                       </div>
                     );
                   })}
@@ -549,7 +561,16 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
                     hoverSound=""
                     onClick={onClickRandom}
                   >
-                    <div>Thần tài chọn số</div>
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 7 }}
+                    >
+                      <img
+                        style={{ width: 30, height: 30, objectFit: "cover" }}
+                        src="/lucky-cat.png"
+                        alt=""
+                      />
+                      <div>Thần tài chọn số</div>
+                    </div>
                   </PlayButton>
                   <PlayButton
                     clickSound=""
@@ -568,9 +589,29 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
                     }
                   >
                     {isClickStart ? (
-                      <div>00:{countdown < 10 ? `0${countdown}` : 10}</div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 7,
+                          justifyContent: "center",
+                        }}
+                      >
+                        <ClockIcon />
+                        <div>00:{countdown < 10 ? `0${countdown}` : 10}</div>
+                      </div>
                     ) : (
-                      <div>Bắt đầu chơi</div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 7,
+                        }}
+                      >
+                        <PlayIcon />
+                        <div>Bắt đầu chơi</div>
+                      </div>
                     )}
                   </PlayButton>
                 </>
@@ -589,7 +630,17 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
                           : "not-allowed",
                     }}
                   >
-                    Quay số tự động
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 7,
+                      }}
+                    >
+                      <MagicIcon />
+                      <div>Quay số tự động</div>
+                    </div>
                   </PlayButton>
                   {/* )} */}
                   {!isRunRandom && (
@@ -605,7 +656,17 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
                             : "not-allowed",
                       }}
                     >
-                      Quay số bằng cơm
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 7,
+                        }}
+                      >
+                        <MagicHandIcon />
+                        <div>Quay số bằng cơm</div>
+                      </div>
                     </PlayButton>
                   )}
                   {isRunRandom && (
@@ -618,7 +679,17 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
                         cursor: isRunRandom ? "pointer" : "not-allowed",
                       }}
                     >
-                      Dừng
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 7,
+                        }}
+                      >
+                        <StopIcon />
+                        <div>Dừng</div>
+                      </div>
                     </PlayButton>
                   )}
                 </>
@@ -642,7 +713,17 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
                         }
                       }}
                     >
-                      Ném đá chủ phòng
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 7,
+                        }}
+                      >
+                        <AngryIcon />
+                        <div>Ném đá chủ phòng</div>
+                      </div>
                     </PlayButton>
                   )}
                   <PlayButton
@@ -662,7 +743,17 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
                       }
                     }}
                   >
-                    Tui còn 1 số nữa
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: 7,
+                      }}
+                    >
+                      <SurpriseIcon />
+                      <div>Tui còn 1 số nữa</div>
+                    </div>
                   </PlayButton>
                 </>
               )}
@@ -674,7 +765,17 @@ const PlayScreen = ({ role, roomName, name, onReturnToWaitingRoom }) => {
                     onClickBingo(matrix, listNumberOfPlayer, roomName)
                   }
                 >
-                  Bingo
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: 7,
+                    }}
+                  >
+                    <TrophyIcon />
+                    <div>Bingo</div>
+                  </div>
                 </PlayButton>
               )}
             </div>
