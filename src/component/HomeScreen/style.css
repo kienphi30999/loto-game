@@ -23,6 +23,18 @@
   backdrop-filter: blur(10px);
   background-color: rgba(255, 255, 255, 0.5);
 }
+.home-screen-setting {
+  display: flex;
+  width: 90%;
+  justify-content: space-between;
+  align-items: center;
+  color: #023581;
+  font-size: 18px;
+  font-weight: bold;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
 
 .home-screen-btn {
   width: 90%;

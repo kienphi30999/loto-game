@@ -5,6 +5,15 @@ import "./style.css";
 import PlayScreen from "../PlayScreen";
 import Button from "../Button";
 import useSound from "use-sound";
+import { LeftIcon, RightIcon } from "../../icon";
+
+const settingList = [
+  "Tuyết rơi",
+  "Mây đêm",
+  "Thành phố",
+  "Đom đóm",
+  "Bọt biển",
+];
 
 const HomeScreen = () => {
   const [step, setStep] = useState("1");
@@ -12,12 +21,17 @@ const HomeScreen = () => {
   const [roomName, setRoomName] = useState("");
   const [roomNameAfterJoin, setRoomNameAfterJoin] = useState("");
   const [listRoom, setListRoom] = useState([]);
+  const [background, setBackground] = useState(0);
+  const [timeAuto, setTimeAuto] = useState(2);
   const wsContextValue = useContext(wsContext);
-  const [backgroundPlay] = useSound("/sound_background.mp3", {
-    volume: 0.5,
-    loop: true,
-    format: ["mp3"],
-  });
+  const [backgroundPlay, { stop: backgroundStop }] = useSound(
+    "/sound_background.mp3",
+    {
+      volume: 0.5,
+      loop: true,
+      format: ["mp3"],
+    }
+  );
 
   const onEnter = (e) => {
     if (name && e?.detail === 1) {
@@ -40,6 +54,11 @@ const HomeScreen = () => {
       wsContextValue.on("list-room", (data) => {
         setListRoom(data);
       });
+    }
+  };
+  const onSetting = (e) => {
+    if (e?.detail === 1) {
+      setStep("setting");
     }
   };
   const onEnterAfterJoin = (e, name) => {
@@ -130,12 +149,118 @@ const HomeScreen = () => {
                 <Button
                   clickSound="/button_click.mp3"
                   className="home-screen-btn"
+                  onClick={onSetting}
+                >
+                  <div>CÀI ĐẶT</div>
+                </Button>
+                <Button
+                  clickSound="/button_click.mp3"
+                  className="home-screen-btn"
                   onClick={() => {
                     setStep("1");
                     setName("");
                   }}
                 >
                   <div>QUAY LẠI</div>
+                </Button>
+              </>
+            )}
+            {step === "setting" && (
+              <>
+                <div className="home-screen-setting">
+                  <div>Hình nền khi chơi:</div>
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 7 }}
+                  >
+                    <LeftIcon
+                      style={{
+                        cursor: background !== 0 ? "pointer" : "not-allowed",
+                        opacity: background !== 0 ? 1 : 0.5,
+                      }}
+                      onClick={() => {
+                        if (background !== 0) {
+                          setBackground((prev) => {
+                            if (prev === 0) return 0;
+                            return prev - 1;
+                          });
+                        }
+                      }}
+                      color="#023581"
+                    />
+                    <div>{settingList?.[background]}</div>
+                    <RightIcon
+                      style={{
+                        cursor:
+                          background !== settingList?.length - 1
+                            ? "pointer"
+                            : "not-allowed",
+                        opacity:
+                          background !== settingList?.length - 1 ? 1 : 0.5,
+                      }}
+                      onClick={() => {
+                        if (background !== settingList?.length - 1) {
+                          setBackground((prev) => {
+                            if (prev === settingList?.length - 1) {
+                              return settingList?.length - 1;
+                            }
+                            return prev + 1;
+                          });
+                        }
+                      }}
+                      color="#023581"
+                    />
+                  </div>
+                </div>
+                <div className="home-screen-setting">
+                  <div>Thời gian quay tự động:</div>
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 7 }}
+                  >
+                    <LeftIcon
+                      style={{
+                        cursor: timeAuto !== 2 ? "pointer" : "not-allowed",
+                        opacity: timeAuto !== 2 ? 1 : 0.5,
+                      }}
+                      onClick={() => {
+                        if (timeAuto !== 2) {
+                          setTimeAuto((prev) => {
+                            if (prev === 2) return 2;
+                            return prev - 1;
+                          });
+                        }
+                      }}
+                      color="#023581"
+                    />
+                    <div>{timeAuto} giây</div>
+                    <RightIcon
+                      style={{
+                        cursor: timeAuto !== 5 ? "pointer" : "not-allowed",
+                        opacity: timeAuto !== 5 ? 1 : 0.5,
+                      }}
+                      onClick={() => {
+                        if (timeAuto !== 5) {
+                          setTimeAuto((prev) => {
+                            if (prev === 5) {
+                              return 5;
+                            }
+                            return prev + 1;
+                          });
+                        }
+                      }}
+                      color="#023581"
+                    />
+                  </div>
+                </div>
+                <Button
+                  clickSound="/button_click.mp3"
+                  className="home-screen-btn"
+                  onClick={() => {
+                    setStep("2");
+                    setRoomName("");
+                    setRoomNameAfterJoin("");
+                  }}
+                >
+                  <div>LƯU</div>
                 </Button>
               </>
             )}
@@ -221,10 +346,13 @@ const HomeScreen = () => {
         </div>
       ) : (
         <PlayScreen
+          background={background}
+          timeAuto={timeAuto}
           role={step?.includes("host") ? "host" : "player"}
           name={name}
           roomName={roomName}
           onReturnToWaitingRoom={() => {
+            backgroundStop();
             setStep("2");
             setListRoom([]);
             setRoomName("");
