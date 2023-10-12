@@ -21,13 +21,17 @@ const LotoBoard = ({
             className="loto-board-container--cell"
             clickSound=""
             hoverSound=""
-            onClick={() => {
-              if (listRandomNumber.length > 0) {
-                if (listRandomNumber?.includes(y)) {
-                  checkPlay();
-                  onClickNumber(y);
-                } else {
-                  checkErrorPlay();
+            onClick={(e) => {
+              if (e?.detail === 1) {
+                if (listRandomNumber.length > 0) {
+                  if (listRandomNumber?.includes(y)) {
+                    if (!listNumberOfPlayer?.includes(y)) {
+                      checkPlay();
+                      onClickNumber(y);
+                    }
+                  } else {
+                    checkErrorPlay();
+                  }
                 }
               }
             }}
