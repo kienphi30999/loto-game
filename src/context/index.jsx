@@ -17,11 +17,11 @@ export function WebSocketConTextProvider({ children }) {
 
   React.useEffect(() => {
     socket.on("connect", (evt) => {
-      console.log("CONNECTED");
+      console.log("CONNECTED WS");
     });
 
     socket.on("disconnect", (evt) => {
-      console.log("DISCONNECTED");
+      console.log("DISCONNECTED WS");
     });
 
     return () => {
