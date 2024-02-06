@@ -1,14 +1,16 @@
 .play-screen--snow {
   height: 100vh;
-  background: radial-gradient(ellipse at right, #0a0025 0%, #000000 100%);
+  background: linear-gradient(0deg, rgba(210,0,55,1) 0%, rgba(222,15,35,1) 35%, rgba(194,49,49,1) 100%);
+  /* background: url("/public/hinh-tet-4.jpeg") no-repeat center center fixed;
+  background-size: cover; */
   overflow: hidden;
   filter: drop-shadow(0 0 10px white);
 }
 .snow {
   position: absolute;
-  width: 10px;
-  height: 10px;
-  background: white;
+  width: 24px;
+  height: 24px;
+  background: transparent;
   border-radius: 50%;
   z-index: 20;
 }

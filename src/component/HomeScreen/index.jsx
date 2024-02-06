@@ -5,15 +5,18 @@ import "./style.css";
 import PlayScreen from "../PlayScreen";
 import Button from "../Button";
 import useSound from "use-sound";
-import { JoinIcon, LeftIcon, RightIcon } from "../../icon";
+import { LeftIcon, RightIcon } from "../../icon";
 
 const settingList = [
-  "Tuyết rơi",
+  "Tết",
   "Mây đêm",
   "Thành phố",
   "Đom đóm",
   "Bọt biển",
 ];
+
+const minTime = 2;
+const maxTime = 6;
 
 const HomeScreen = () => {
   const [step, setStep] = useState("1");
@@ -22,11 +25,11 @@ const HomeScreen = () => {
   const [roomNameAfterJoin, setRoomNameAfterJoin] = useState("");
   const [listRoom, setListRoom] = useState([]);
   const [background, setBackground] = useState(0);
-  const [timeAuto, setTimeAuto] = useState(2);
+  const [timeAuto, setTimeAuto] = useState(minTime);
   const [isPrivate, setIsPrivate] = useState(false);
   const wsContextValue = useContext(wsContext);
   const [backgroundPlay, { stop: backgroundStop }] = useSound(
-    "/sound_background.mp3",
+    "/sound_background2.mp3",
     {
       volume: 0.5,
       loop: true,
@@ -187,7 +190,7 @@ const HomeScreen = () => {
                           });
                         }
                       }}
-                      color="#023581"
+                      color="#BF0805"
                     />
                     <div>{settingList?.[background]}</div>
                     <RightIcon
@@ -209,7 +212,7 @@ const HomeScreen = () => {
                           });
                         }
                       }}
-                      color="#023581"
+                      color="#BF0805"
                     />
                   </div>
                 </div>
@@ -220,36 +223,36 @@ const HomeScreen = () => {
                   >
                     <LeftIcon
                       style={{
-                        cursor: timeAuto !== 2 ? "pointer" : "not-allowed",
-                        opacity: timeAuto !== 2 ? 1 : 0.5,
+                        cursor: timeAuto !== minTime ? "pointer" : "not-allowed",
+                        opacity: timeAuto !== minTime ? 1 : 0.5,
                       }}
                       onClick={() => {
-                        if (timeAuto !== 2) {
+                        if (timeAuto !== minTime) {
                           setTimeAuto((prev) => {
-                            if (prev === 2) return 2;
+                            if (prev === minTime) return minTime;
                             return prev - 1;
                           });
                         }
                       }}
-                      color="#023581"
+                      color="#BF0805"
                     />
                     <div>{timeAuto} giây</div>
                     <RightIcon
                       style={{
-                        cursor: timeAuto !== 5 ? "pointer" : "not-allowed",
-                        opacity: timeAuto !== 5 ? 1 : 0.5,
+                        cursor: timeAuto !== maxTime ? "pointer" : "not-allowed",
+                        opacity: timeAuto !== maxTime ? 1 : 0.5,
                       }}
                       onClick={() => {
-                        if (timeAuto !== 5) {
+                        if (timeAuto !== maxTime) {
                           setTimeAuto((prev) => {
-                            if (prev === 5) {
-                              return 5;
+                            if (prev === maxTime) {
+                              return maxTime;
                             }
                             return prev + 1;
                           });
                         }
                       }}
-                      color="#023581"
+                      color="#BF0805"
                     />
                   </div>
                 </div>
@@ -271,7 +274,7 @@ const HomeScreen = () => {
                 <div
                   style={{
                     fontSize: 18,
-                    color: "#023581",
+                    color: "#BF0805",
                     fontWeight: "bold",
                   }}
                 >
@@ -307,7 +310,7 @@ const HomeScreen = () => {
                     <div
                       style={{
                         fontSize: 18,
-                        color: "#023581",
+                        color: "#BF0805",
                         fontWeight: "bold",
                       }}
                     >
@@ -393,7 +396,7 @@ const HomeScreen = () => {
                           setIsPrivate(false);
                         }
                       }}
-                      color="#023581"
+                      color="#BF0805"
                     />
                     <div>{isPrivate ? "Có" : "Không"}</div>
                     <RightIcon
@@ -406,7 +409,7 @@ const HomeScreen = () => {
                           setIsPrivate(true);
                         }
                       }}
-                      color="#023581"
+                      color="#BF0805"
                     />
                   </div>
                 </div>

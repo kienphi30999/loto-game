@@ -296,7 +296,7 @@ const PlayScreen = ({
         (item) => item?.id === data?.from_sid
       )?.name;
       if (data?.content === "shit" && role === "host") {
-        notificationPlay();
+        // notificationPlay();
         notification.warning({
           message: <strong>Bạn vừa bị {getUser} ném đá</strong>,
           description: "Vì một lí do nào đó, người chơi này muốn ném đá bạn",
@@ -307,7 +307,7 @@ const PlayScreen = ({
         data?.content === "you-touch" &&
         wsContextValue?.id !== data?.from_sid
       ) {
-        notificationPlay();
+        // notificationPlay();
         notification.warning({
           message: <strong>Bạn vừa bị {getUser} ghẹo</strong>,
           description: "Chắc người ta thích bạn nên ghẹo vậy thui đó",
@@ -324,7 +324,7 @@ const PlayScreen = ({
       )?.isHost;
       if (data?.from_sid !== wsContextValue?.id) {
         if (isHost) {
-          notificationPlay();
+          // notificationPlay();
           notification.warning({
             message: <strong>Chủ phòng chỉ còn 1 số nữa thôi</strong>,
             description:
@@ -332,7 +332,7 @@ const PlayScreen = ({
             key: "only-1-to-bingo",
           });
         } else {
-          notificationPlay();
+          // notificationPlay();
           notification.warning({
             message: <strong>{getUser} chỉ còn 1 số nữa thôi</strong>,
             description:

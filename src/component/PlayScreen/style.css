@@ -34,6 +34,7 @@
   width: 100%;
   height: 70%;
   padding: 0 40px;
+  margin-top: 7px;
 }
 .play-screen-action-container {
   display: flex;
@@ -131,10 +132,11 @@
   min-width: 180px;
   max-width: 240px;
   border: 2px solid #ffffff;
+  padding-top: 6px;
   color: #ffffff;
   border-radius: 16px;
-  font-size: 30px;
-  font-weight: bold;
+  font-size: 40px;
+  font-weight: 900;
   -webkit-user-select: none; /* Safari */
   -ms-user-select: none; /* IE 10 and IE 11 */
   user-select: none; /* Standard syntax */
