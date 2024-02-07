@@ -6,14 +6,9 @@ import PlayScreen from "../PlayScreen";
 import Button from "../Button";
 import useSound from "use-sound";
 import { LeftIcon, RightIcon } from "../../icon";
+import backgroundAudio from "../../sound/sound_background2.mp3";
 
-const settingList = [
-  "Tết",
-  "Mây đêm",
-  "Thành phố",
-  "Đom đóm",
-  "Bọt biển",
-];
+const settingList = ["Tết", "Mây đêm", "Thành phố", "Đom đóm", "Bọt biển"];
 
 const minTime = 2;
 const maxTime = 6;
@@ -28,14 +23,11 @@ const HomeScreen = () => {
   const [timeAuto, setTimeAuto] = useState(minTime);
   const [isPrivate, setIsPrivate] = useState(false);
   const wsContextValue = useContext(wsContext);
-  const [backgroundPlay, { stop: backgroundStop }] = useSound(
-    "/sound_background2.mp3",
-    {
-      volume: 0.5,
-      loop: true,
-      format: ["mp3"],
-    }
-  );
+  const [backgroundPlay, { stop: backgroundStop }] = useSound(backgroundAudio, {
+    volume: 0.5,
+    loop: true,
+    format: ["mp3"],
+  });
 
   const onEnter = (e) => {
     if (name && e?.detail === 1) {
@@ -223,7 +215,8 @@ const HomeScreen = () => {
                   >
                     <LeftIcon
                       style={{
-                        cursor: timeAuto !== minTime ? "pointer" : "not-allowed",
+                        cursor:
+                          timeAuto !== minTime ? "pointer" : "not-allowed",
                         opacity: timeAuto !== minTime ? 1 : 0.5,
                       }}
                       onClick={() => {
@@ -239,7 +232,8 @@ const HomeScreen = () => {
                     <div>{timeAuto} giây</div>
                     <RightIcon
                       style={{
-                        cursor: timeAuto !== maxTime ? "pointer" : "not-allowed",
+                        cursor:
+                          timeAuto !== maxTime ? "pointer" : "not-allowed",
                         opacity: timeAuto !== maxTime ? 1 : 0.5,
                       }}
                       onClick={() => {
